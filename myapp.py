@@ -1,10 +1,11 @@
+from asyncio.windows_events import NULL
 from flask import Flask, g, request, jsonify
 import sqlite3
 
 app = Flask(__name__)
 
 def connect_db():
-    sql = sqlite3.connect('data\data2db.db')
+    sql = sqlite3.connect("data\database_v2.db")
     sql.row_factory = sqlite3.Row
     return sql
 
@@ -26,15 +27,29 @@ def viewusers():
     db = get_db()
     if 'name' in request.args:
       name = request.args['name']
-      # For data.db
-      # query1 = "SELECT trackers.name, categories.name as 'category' FROM trackers, categories WHERE trackers.category_id = categories.id and trackers.name = {n}".format(n = name)
-      # For data2db.db
-      # query1 = "SELECT cookie_data_key_name as 'name', category as 'category' FROM mytable WHERE cookie_data_key_name = {n}".format(n = name)
-     
+      # For trackerdb.sql
+      query1 = "SELECT trackers.name, categories.name as 'category' FROM trackers, categories WHERE trackers.category_id = categories.id and trackers.name = {n}".format(n = name)
       cursor = db.execute(query1)
       results = cursor.fetchall()
-      category = results[0]['category']
-      return HELLO_HTML.format(name, category)
+      if len(results) > 0: 
+        category = results[0]['category']
+        return HELLO_HTML.format(name, category)
+      else:
+        # For open-cookie-database.csv
+        query1 = "SELECT cookie_data_key_name as 'name', category as 'category' FROM open_database WHERE cookie_data_key_name = {n}".format(n = name)
+        cursor = db.execute(query1)
+        results = cursor.fetchall()
+        if len(results) > 0: 
+          category = results[0]['category']
+          return HELLO_HTML.format(name, category)
+    # For WhoTracksMe sites
+    if 'domain' in request.args:
+      domain = request.args['domain']
+      query2 = "SELECT * FROM sites WHERE domain = {n}".format(n = domain)
+      cursor2 = db.execute(query2)
+      results2 = cursor2.fetchall()
+      category2 = results2[0]['category']
+      return HELLO_HTML.format(name, category2)
     else:
       return "<p>Hello World</p>"
 
