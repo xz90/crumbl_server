@@ -22,36 +22,52 @@ def close_db(error):
     if hasattr(g, 'sqlite_db'):
         g.sqlite3_db.close()
 
-@app.route('/')
+@app.route('/', methods=['GET'])
 def viewusers():
-    db = get_db()
-    if 'name' in request.args:
-      name = request.args['name']
-      # For trackerdb.sql
-      query1 = "SELECT trackers.name, categories.name as 'category' FROM trackers, categories WHERE trackers.category_id = categories.id and trackers.name = {n}".format(n = name)
-      cursor = db.execute(query1)
-      results = cursor.fetchall()
-      if len(results) > 0: 
-        category = results[0]['category']
-        return HELLO_HTML.format(name, category)
-      else:
-        # For open-cookie-database.csv
-        query1 = "SELECT cookie_data_key_name as 'name', category as 'category' FROM open_database WHERE cookie_data_key_name = {n}".format(n = name)
-        cursor = db.execute(query1)
+    if request.method == 'GET':
+      db = get_db()
+      name = request.form['name']
+      domain = request.form['domain']
+      # return """ {0} {1} """.format(name,domain)
+      if name:
+        # For trackerdb.sql
+        query = "SELECT trackers.name, categories.name as 'category' FROM trackers, categories WHERE trackers.category_id = categories.id and trackers.name = {n}".format(n = name)
+        # ERROR on line 36: sqlite3.OperationalError: unrecognized token: "16353d", if there is no matching name
+        cursor = db.execute(query)
         results = cursor.fetchall()
-        if len(results) > 0: 
+        # ERROR: Can not retrieve data
+        return """ {0} {1} {2}""".format(name,domain,len(results))
+        # didnt go here, len()=0
+        if len(results) > 0:
           category = results[0]['category']
           return HELLO_HTML.format(name, category)
-    # For WhoTracksMe sites
-    if 'domain' in request.args:
-      domain = request.args['domain']
-      query2 = "SELECT * FROM sites WHERE domain = {n}".format(n = domain)
-      cursor2 = db.execute(query2)
-      results2 = cursor2.fetchall()
-      category2 = results2[0]['category']
-      return HELLO_HTML.format(name, category2)
-    else:
-      return "<p>Hello World</p>"
+        else:
+          # For open-cookie-database.csv
+          query1 = "SELECT cookie_data_key_name as 'name', category as 'category' FROM open_database WHERE cookie_data_key_name = {n}".format(n = name)
+          cursor1 = db.execute(query1)
+          results = cursor1.fetchall()
+          if len(results) > 0: 
+            category = results[0]['category']
+            return HELLO_HTML.format(name, category)
+      # For WhoTracksMe sites
+      if domain:
+        query2 = "SELECT * FROM sites WHERE domain = {m}".format(m = domain)
+        cursor2 = db.execute(query2)
+        results2 = cursor2.fetchall()
+        if len(results2) > 0: 
+          category2 = results2[0]['category']
+          return HELLO_HTML.format(name, category2)
+        else:
+          return "<p>Hello World</p>"
+      else:
+        return "<p>Hello World</p>"
+    return "<p>Hello World</p>"
+
+
+    
+  
+
+
 
 HELLO_HTML = """
   <html><body>
