@@ -1,10 +1,10 @@
-from flask import Flask, g, request
+from flask import Flask, g, request, jsonify
 import sqlite3
 
 app = Flask(__name__)
 
 def connect_db():
-    sql = sqlite3.connect('./data.db')
+    sql = sqlite3.connect('data\data2db.db')
     sql.row_factory = sqlite3.Row
     return sql
 
@@ -28,7 +28,11 @@ def viewusers():
     db = get_db()
     if 'name' in request.args:
       name = request.args['name']
-      query1 = "SELECT trackers.name, categories.name as 'category' FROM trackers, categories WHERE trackers.category_id = categories.id and trackers.name = {n}".format(n = name)
+      # For data.db
+      # query1 = "SELECT trackers.name, categories.name as 'category' FROM trackers, categories WHERE trackers.category_id = categories.id and trackers.name = {n}".format(n = name)
+      # For data2db.db
+      # query1 = "SELECT cookie_data_key_name as 'name', category as 'category' FROM mytable WHERE cookie_data_key_name = {n}".format(n = name)
+     
       cursor = db.execute(query1)
       results = cursor.fetchall()
       category = results[0]['category']
@@ -44,49 +48,3 @@ HELLO_HTML = """
 
 if __name__ == '__main__':
     app.run(debug = True)
-
-# Old edition
-# from unittest import TestLoader
-# from flask import Flask, render_template, request
-# import sqlite3
-# import os
-
-# currentdirectory = os.path.dirname(os.path.abspath(__file__))
-
-# app = Flask(__name__)
-
-
-# @app.route("/")
-# def main():
-#   return "<p>hello</p>"
-
-
-# @app.route("/", methods = ["POST"])
-# def cookiejar():
-#   name = request.form["Name"]
-#   category = request.form["Category"]
-#   connection = sqlite3.connect(currentdirectory + "\cookiejar.db")
-#   cursor = connection.cursor()
-#   query1 = "INSERT INTO Cookiejar VALUES('{n}','{c}')".format(n = name, c = category)
-#   cursor.execute(query1)
-#   connection.commit()
-
-# @app.route("/resultpage",methods = ["GET"])
-# def resultpage():
-#   try:
-#     if request.method == "GET":
-#       name = request.args.get("Name")
-#       connection = sqlite3.connect(currentdirectory + "\cookiejar.db")
-#       cursor = connection.cursor()
-#       query1 = "SELECT Category from Cookiejar WHERE Name = {n}".format(n = name)
-#       result = cursor.execute(query1)
-#       result = result.fetchall()[0][0]
-#       return render_template("Resultpage.html", Category = result)
-#   except:
-#     return render_template("Resultpage.html", Category = "")
-
-
-
-
-# if __name__ == "__main__":
-#   app.run()
