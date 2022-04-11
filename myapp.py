@@ -35,6 +35,11 @@ def viewusers():
       results = cursor.fetchall()
       if len(results) > 0:
         category = results[0]['category']
+        return jsonify(
+          name = name,
+          domain = domain,
+          category = category
+        )
         return HELLO_HTML.format(name, category)
       else:
         # For open-cookie-database.csv
@@ -43,15 +48,23 @@ def viewusers():
         results = cursor1.fetchall()
         if len(results) > 0: 
           category = results[0]['category']
-          return HELLO_HTML.format(name, category)
+          return jsonify(
+            name = name,
+            domain = domain,
+            category = category
+          )
     # For WhoTracksMe sites
     if domain:
-      query2 = "SELECT * FROM sites WHERE domain = ?"
-      cursor2 = db.execute(query2, (domain, ))
-      results2 = cursor2.fetchall()
-      if len(results2) > 0: 
-        category2 = results2[0]['category']
-        return HELLO_HTML.format(name, category2)
+      query = "SELECT * FROM sites WHERE domain = ?"
+      cursor = db.execute(query, (domain, ))
+      results = cursor.fetchall()
+      if len(results) > 0: 
+        category = results[0]['category']
+        return jsonify(
+          name = name,
+          domain = domain,
+          category = category
+        )
   return "<p>Hello World</p>"
 
 
