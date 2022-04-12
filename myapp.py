@@ -40,7 +40,6 @@ def viewusers():
           domain = domain,
           category = category
         )
-        return HELLO_HTML.format(name, category)
       else:
         # For open-cookie-database.csv
         query1 = "SELECT cookie_data_key_name as 'name', category as 'category' FROM open_database WHERE cookie_data_key_name = ?"
@@ -65,14 +64,11 @@ def viewusers():
           domain = domain,
           category = category
         )
-  return "<p>Hello World</p>"
-
-
-HELLO_HTML = """
-  <html><body>
-    <h1>Hello, {0}!</h1>
-    Your category is {1}.
-  </body></html>"""
+  return jsonify(
+          name = "",
+          domain = "",
+          category = ""
+        )
 
 if __name__ == '__main__':
     app.run(debug = True)
