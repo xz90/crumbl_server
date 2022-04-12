@@ -65,9 +65,9 @@ def viewusers():
           category = category
         )
   return jsonify(
-          name = "",
-          domain = "",
-          category = ""
+          name = name,
+          domain = domain,
+          category = "unknown"
         )
 
 if __name__ == '__main__':
