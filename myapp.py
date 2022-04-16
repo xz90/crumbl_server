@@ -55,15 +55,21 @@ def viewusers():
     # For WhoTracksMe sites
     if domain:
       query = "SELECT * FROM sites WHERE domain = ?"
-      cursor = db.execute(query, (domain, ))
-      results = cursor.fetchall()
-      if len(results) > 0: 
-        category = results[0]['category']
-        return jsonify(
-          name = name,
-          domain = domain,
-          category = category
-        )
+      while len(domain) != 0:
+        cursor = db.execute(query, (domain, ))
+        results = cursor.fetchall()
+        if len(results) > 0: 
+          category = results[0]['category']
+          return jsonify(
+            name = name,
+            domain = domain,
+            category = category
+          )
+        else:
+          if len(domain) > 1:
+            domain = domain.split('.', 1)[1]
+          else:
+            break
   return jsonify(
           name = name,
           domain = domain,
