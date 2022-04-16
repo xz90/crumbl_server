@@ -1,4 +1,3 @@
-from asyncio.windows_events import NULL
 from flask import Flask, g, request, jsonify
 import sqlite3
 
@@ -25,15 +24,39 @@ def close_db(error):
 @app.route('/', methods=['GET'])
 def viewusers():
   db = get_db()
-  if request.method == 'GET':
-    name = request.form['name']
-    domain = request.form['domain']
-    if name:
-      # For trackerdb.sql
-      query = "SELECT trackers.name, categories.name as 'category' FROM trackers, categories WHERE trackers.category_id = categories.id and trackers.name = ?"
-      cursor = db.execute(query, (name, ))
+  name = request.form['name']
+  domain = request.form['domain']
+  if name:
+    # For trackerdb.sql
+    query = "SELECT trackers.name, categories.name as 'category' FROM trackers, categories WHERE trackers.category_id = categories.id and trackers.name = ?"
+    cursor = db.execute(query, (name, ))
+    results = cursor.fetchall()
+    if len(results) > 0:
+      category = results[0]['category']
+      return jsonify(
+        name = name,
+        domain = domain,
+        category = category
+      )
+    else:
+      # For open-cookie-database.csv
+      query1 = "SELECT cookie_data_key_name as 'name', category as 'category' FROM open_database WHERE cookie_data_key_name = ?"
+      cursor1 = db.execute(query1, (name, ))
+      results = cursor1.fetchall()
+      if len(results) > 0: 
+        category = results[0]['category']
+        return jsonify(
+          name = name,
+          domain = domain,
+          category = category
+        )
+  # For WhoTracksMe sites
+  if domain:
+    query = "SELECT * FROM sites WHERE domain = ?"
+    while len(domain) != 0:
+      cursor = db.execute(query, (domain, ))
       results = cursor.fetchall()
-      if len(results) > 0:
+      if len(results) > 0: 
         category = results[0]['category']
         return jsonify(
           name = name,
@@ -41,40 +64,15 @@ def viewusers():
           category = category
         )
       else:
-        # For open-cookie-database.csv
-        query1 = "SELECT cookie_data_key_name as 'name', category as 'category' FROM open_database WHERE cookie_data_key_name = ?"
-        cursor1 = db.execute(query1, (name, ))
-        results = cursor1.fetchall()
-        if len(results) > 0: 
-          category = results[0]['category']
-          return jsonify(
-            name = name,
-            domain = domain,
-            category = category
-          )
-    # For WhoTracksMe sites
-    if domain:
-      query = "SELECT * FROM sites WHERE domain = ?"
-      while len(domain) != 0:
-        cursor = db.execute(query, (domain, ))
-        results = cursor.fetchall()
-        if len(results) > 0: 
-          category = results[0]['category']
-          return jsonify(
-            name = name,
-            domain = domain,
-            category = category
-          )
+        if len(domain) > 1:
+          domain = domain.split('.', 1)[1]
         else:
-          if len(domain) > 1:
-            domain = domain.split('.', 1)[1]
-          else:
-            break
+          break
   return jsonify(
-          name = name,
-          domain = domain,
-          category = "unknown"
-        )
+        name = name,
+        domain = domain,
+        category = "unknown"
+      )
 
 if __name__ == '__main__':
     app.run(debug = True)
