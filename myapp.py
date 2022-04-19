@@ -64,8 +64,9 @@ def viewusers():
           category = category
         )
       else:
-        if len(domain) > 1:
-          domain = domain.split('.', 1)[1]
+        dlist = domain.split('.', 1)
+        if len(dlist) > 1:
+          domain = dlist[1]
         else:
           break
   return jsonify(
