@@ -52,6 +52,7 @@ def viewusers():
         )
   # For WhoTracksMe sites
   if domain:
+    domaincopy = domain
     query = "SELECT * FROM sites WHERE domain = ?"
     while len(domain) != 0:
       cursor = db.execute(query, (domain, ))
@@ -71,7 +72,7 @@ def viewusers():
           break
   return jsonify(
         name = name,
-        domain = domain,
+        domain = domaincopy,
         category = "unknown"
       )
 
