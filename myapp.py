@@ -55,13 +55,13 @@ def viewusers():
         category = results[0]['name']
         return jsonify(
           name = name,
-          domain = domain,
+          domain = request.form['domain'],
           category = category
         )
       else:
         dlist = domain.split('.', 1)
         if len(dlist) > 1:
-          domain = domain.split('.', 1)[1]
+          domain = dlist[1]
         else:
           break
 
@@ -75,18 +75,18 @@ def viewusers():
         category = results[0]['category']
         return jsonify(
           name = name,
-          domain = domain,
+          domain = request.form['domain'],
           category = category
         )
       else:
         dlist = domain.split('.', 1)
         if len(dlist) > 1:
-          domain = domain.split('.', 1)[1]
+          domain = dlist[1]
         else:
           break
   return jsonify(
         name = name,
-        domain = domain,
+        domain = request.form['domain'],
         category = "unknown"
       )
 
