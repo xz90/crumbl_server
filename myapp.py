@@ -24,57 +24,52 @@ def close_db(error):
 @app.route('/', methods=['GET'])
 def viewusers():
   db = get_db()
-  name = request.form['name']
-  domain = request.form['domain']
-  if name:
-    # For trackerdb.sql
-    query = "SELECT trackers.name, categories.name as 'category' FROM trackers, categories WHERE trackers.category_id = categories.id and trackers.name = ?"
-    cursor = db.execute(query, (name, ))
-    results = cursor.fetchall()
-    if len(results) > 0:
-      category = results[0]['category']
-      return jsonify(
-        name = name,
-        domain = domain,
-        category = category
-      )
-    else:
-      # For open-cookie-database.csv
-      query1 = "SELECT cookie_data_key_name as 'name', category as 'category' FROM open_database WHERE cookie_data_key_name = ?"
-      cursor1 = db.execute(query1, (name, ))
-      results = cursor1.fetchall()
-      if len(results) > 0: 
-        category = results[0]['category']
-        return jsonify(
-          name = name,
-          domain = domain,
-          category = category
-        )
-  # For WhoTracksMe sites
-  if domain:
-    domaincopy = domain
-    query = "SELECT * FROM sites WHERE domain = ?"
-    while len(domain) != 0:
-      cursor = db.execute(query, (domain, ))
-      results = cursor.fetchall()
-      if len(results) > 0: 
-        category = results[0]['category']
-        return jsonify(
-          name = name,
-          domain = domain,
-          category = category
-        )
-      else:
-        dlist = domain.split('.', 1)
-        if len(dlist) > 1:
-          domain = dlist[1]
+  returnlist = []
+  if (request.data):
+    jdata = request.get_json()
+
+    for singlejson in jdata['list']:
+      name = singlejson['name']
+      domain = singlejson['domain']
+      category = 'unknown'
+    
+      if name:
+        # For trackerdb.sql
+        query = "SELECT trackers.name, categories.name as 'category' FROM trackers, categories WHERE trackers.category_id = categories.id and trackers.name = ?"
+        cursor = db.execute(query, (name, ))
+        results = cursor.fetchall()
+        if len(results) > 0:
+          category = results[0]['category']
         else:
-          break
-  return jsonify(
-        name = name,
-        domain = domaincopy,
-        category = "unknown"
-      )
+          # For open-cookie-database.csv
+          query1 = "SELECT cookie_data_key_name as 'name', category as 'category' FROM open_database WHERE cookie_data_key_name = ?"
+          cursor1 = db.execute(query1, (name, ))
+          results = cursor1.fetchall()
+          if len(results) > 0: 
+            category = results[0]['category']
+      # For WhoTracksMe sites
+      if domain:
+        domaincopy = domain
+        query = "SELECT * FROM sites WHERE domain = ?"
+        while len(domain) != 0:
+          cursor = db.execute(query, (domain, ))
+          results = cursor.fetchall()
+          if len(results) > 0: 
+            category = results[0]['category']
+            return jsonify(
+              name = name,
+              domain = domain,
+              category = category
+            )
+          else:
+            dlist = domain.split('.', 1)
+            if len(dlist) > 1:
+              domain = dlist[1]
+            else:
+              break
+        returnlist.append({'name': name, 'domain': domain, 'category': category})
+  
+  return jsonify(results = returnlist)
 
 if __name__ == '__main__':
     app.run(debug = True)
