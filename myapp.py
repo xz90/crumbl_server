@@ -21,7 +21,7 @@ def close_db(error):
     if hasattr(g, 'sqlite_db'):
         g.sqlite3_db.close()
 
-@app.route('/', methods=['GET'])
+@app.route('/', methods=['POST'])
 def viewusers():
   # db = get_db()
   returnlist = []
